@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Media Request System — ZABTech ITVE Larkana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1E4FA0;
+    --blue-deep: #12345F;
+    --green: #4C8A34;
+    --red: #C23528;
+    --amber: #B7790E;
+
+    --bg: #EEF1F6;
+    --fg: #14213B;
+    --card-bg: #FFFFFF;
+    --card-bg-raised: #F5F7FB;
+    --border: #D6DDE9;
+    --sub: #51607C;
+    --muted: #93A0B8;
+
+    --green-dim: #E9F2E4;
+    --red-dim: #FAE6E3;
+    --amber-dim: #F8EDD8;
+
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1A30; --fg: #EAF0FA; --card-bg: #142642; --card-bg-raised: #1A3050;
+      --border: #26426A; --sub: #9CACC8; --muted: #5F7292;
+      --green-dim: #1f3319; --red-dim: #3a1b18; --amber-dim: #3a2a10;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1A30; --fg: #EAF0FA; --card-bg: #142642; --card-bg-raised: #1A3050;
+    --border: #26426A; --sub: #9CACC8; --muted: #5F7292;
+    --green-dim: #1f3319; --red-dim: #3a1b18; --amber-dim: #3a2a10;
+  }
+
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100%; background: var(--bg); color: var(--fg);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  /* ---------- Letterhead ---------- */
+  .letterhead {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-top: 5px solid var(--blue);
+    border-radius: 6px;
+    padding: 22px 26px;
+    margin-bottom: 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .letterhead .id { display: flex; align-items: center; gap: 16px; }
+  .letterhead img { height: 54px; width: auto; }
+  .letterhead h1 {
+    font-family: 'IBM Plex Serif', serif;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0;
+    color: var(--blue-deep);
+  }
+  .letterhead .sub {
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    color: var(--sub);
+    letter-spacing: 0.01em;
+  }
+  .letterhead .doc-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+  }
+  .theme-toggle {
+    background: none; border: 1px solid var(--border); color: var(--sub);
+    border-radius: 4px; padding: 6px 12px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; cursor: pointer; margin-top: 6px;
+  }
+  .theme-toggle:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ---------- Summary strip ---------- */
+  .summary {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 30px; border-radius: 6px; overflow: hidden;
+  }
+  .sum-cell { background: var(--card-bg); padding: 15px 18px; }
+  .sum-cell .num { font-family: 'IBM Plex Serif', serif; font-size: 27px; font-weight: 600; color: var(--blue-deep); }
+  .sum-cell .label { margin-top: 3px; font-size: 11.5px; color: var(--sub); }
+
+  /* ---------- Submission form ---------- */
+  .panel {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 22px;
+    margin-bottom: 30px;
+  }
+  .panel h2 {
+    font-family: 'IBM Plex Serif', serif; font-size: 16px; font-weight: 600; margin: 0 0 18px;
+    color: var(--blue-deep);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 5px; }
+  input, select, textarea {
+    width: 100%; background: var(--card-bg-raised); border: 1px solid var(--border); color: var(--fg);
+    border-radius: 4px; padding: 9px 10px; font-family: inherit; font-size: 14px;
+  }
+  textarea { resize: vertical; min-height: 50px; }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(30,79,160,.15);
+  }
+  .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: end; }
+  .form-grid .field.wide { grid-column: span 4; }
+  @media (max-width: 900px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .field.wide { grid-column: span 2; }
+  }
+  @media (max-width: 560px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .field.wide { grid-column: span 1; }
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: none; border-radius: 4px; padding: 10px 20px;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-deep); }
+
+  /* ---------- Pipeline sections ---------- */
+  .pipeline { margin-bottom: 34px; }
+  .pipeline-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .pipeline-head h2 {
+    font-family: 'IBM Plex Serif', serif; font-size: 17px; font-weight: 600; margin: 0;
+    color: var(--blue-deep);
+  }
+  .pipeline-head .count { font-size: 12px; color: var(--sub); font-family: 'IBM Plex Mono', monospace; }
+
+  .columns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .columns { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .columns { grid-template-columns: 1fr; } }
+
+  .column {
+    background: var(--card-bg-raised); border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px; min-height: 90px;
+  }
+  .column-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12.5px; font-weight: 600; color: var(--fg); margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--col-accent, var(--blue));
+  }
+  .column-head .n {
+    font-family: 'IBM Plex Mono', monospace; color: var(--sub); font-weight: 400; font-size: 11.5px;
+  }
+
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 5px;
+    padding: 11px 12px; margin-bottom: 9px; font-size: 12.5px;
+  }
+  .card:last-child { margin-bottom: 0; }
+  .card .ref { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--muted); margin-bottom: 3px; }
+  .card .title { font-weight: 600; font-size: 13.5px; margin: 0 0 4px; line-height: 1.3; }
+  .card .meta { color: var(--sub); font-size: 11.5px; margin-bottom: 3px; }
+  .card .note { color: var(--sub); font-size: 11.5px; line-height: 1.4; margin: 5px 0 0; }
+  .card .due-flag {
+    display: inline-block; margin-top: 5px; font-size: 10.5px; font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 6px; border-radius: 3px; background: var(--amber-dim); color: var(--amber);
+  }
+  .card-actions { display: flex; gap: 6px; margin-top: 9px; }
+  .card-actions button {
+    flex: 1; border: 1px solid var(--border); background: var(--card-bg); color: var(--sub);
+    border-radius: 4px; padding: 5px 6px; font-size: 11px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .card-actions button:hover { border-color: var(--blue); color: var(--blue); }
+  .card-actions button.danger:hover { border-color: var(--red); color: var(--red); }
+
+  .col-empty { font-size: 11.5px; color: var(--muted); padding: 10px 2px; text-align: center; }
+
+  footer {
+    margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 11.5px; font-family: 'IBM Plex Mono', monospace;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  /* ---------- Login overlay ---------- */
+  .login-overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 50;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .login-box {
+    background: var(--card-bg); border: 1px solid var(--border); border-top: 5px solid var(--blue);
+    border-radius: 6px; padding: 28px 26px; width: 100%; max-width: 360px;
+  }
+  .login-box h2 {
+    font-family: 'IBM Plex Serif', serif; font-size: 18px; font-weight: 600; margin: 0 0 4px;
+    color: var(--blue-deep);
+  }
+  .login-box .login-sub { font-size: 12px; color: var(--sub); margin: 0 0 20px; }
+  .login-options { display: flex; flex-direction: column; gap: 10px; }
+  .btn-guest { background: var(--card-bg-raised); color: var(--fg); border: 1px solid var(--border); }
+  .btn-guest:hover { border-color: var(--blue); color: var(--blue); }
+  .admin-login { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .login-error { color: var(--red); font-size: 12px; margin: 10px 0 0; display: none; }
+
+  /* ---------- Role bar / role-gated controls ---------- */
+  .role-bar {
+    display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--sub);
+    font-family: 'IBM Plex Mono', monospace; margin-top: 6px; justify-content: flex-end;
+  }
+  .role-pill {
+    font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 11px;
+    padding: 2px 9px; border-radius: 10px;
+  }
+  body[data-role="admin"] .role-pill { background: var(--green-dim); color: var(--green); }
+  body[data-role="guest"] .role-pill { background: var(--amber-dim); color: var(--amber); }
+  .logout-link {
+    background: none; border: 1px solid var(--border); color: var(--sub);
+    cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    border-radius: 4px; padding: 3px 10px;
+  }
+  .logout-link:hover { border-color: var(--red); color: var(--red); }
+
+  /* Guest = read-only: hide the submission panel and all card edit actions */
+  body[data-role="guest"] .submit-panel { display: none; }
+  body[data-role="guest"] .card-actions { display: none; }
+
+  /* ---------- Work report ---------- */
+  .report-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .report-tab {
+    background: var(--card-bg-raised); border: 1px solid var(--border); color: var(--sub);
+    border-radius: 4px; padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .report-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .report-tab:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+
+  .report-summary { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 14px; font-size: 12px; color: var(--sub); }
+  .report-summary strong {
+    font-family: 'IBM Plex Serif', serif; font-size: 16px; color: var(--blue-deep); margin-right: 5px;
+  }
+
+  .report-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 700px) { .report-groups { grid-template-columns: 1fr; } }
+  .report-group-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12.5px; font-weight: 600; color: var(--fg); margin-bottom: 8px;
+    padding-bottom: 7px; border-bottom: 2px solid var(--blue);
+  }
+  .report-group-head .n {
+    font-family: 'IBM Plex Mono', monospace; color: var(--sub); font-weight: 400; font-size: 11.5px;
+  }
+  .report-list { display: flex; flex-direction: column; gap: 7px; max-height: 340px; overflow-y: auto; }
+  .report-line {
+    display: flex; gap: 10px; font-size: 12.5px; padding: 8px 10px;
+    background: var(--card-bg-raised); border: 1px solid var(--border); border-radius: 4px;
+  }
+  .report-time {
+    font-family: 'IBM Plex Mono', monospace; color: var(--muted); white-space: nowrap; font-size: 11px; min-width: 62px;
+  }
+  .report-text { color: var(--fg); line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>Media Request System</h2>
+    <p class="login-sub">ZABTech ITVE Larkana — sign in to continue</p>
+    <div class="login-options">
+      <button class="btn btn-guest" id="guestBtn" type="button">Continue as Guest (view only)</button>
+      <div class="admin-login">
+        <input type="password" id="adminPass" placeholder="Admin password">
+        <button class="btn btn-primary" id="adminBtn" type="button">Admin login</button>
+      </div>
+    </div>
+    <p class="login-error" id="loginError">Incorrect password. Try again.</p>
+  </div>
+</div>
+
+<div class="wrap" id="mainApp" style="display:none;">
+
+  <div class="letterhead">
+    <div class="id">
+      <img src="file:///C:/Users/SHABBY/Desktop/POSTER%20[Recovered]_1.png" alt="ZABTech ITVE Larkana logo">
+      <div>
+        <h1>Media Request System</h1>
+        <p class="sub">ZABTech ITVE — Shaheed Zulfiqar Ali Bhutto Institute of Science and Technology, Larkana</p>
+      </div>
+    </div>
+    <div>
+      <div class="doc-tag" id="docDate"></div>
+      <button class="theme-toggle" id="themeToggle">Switch to dark</button>
+      <div class="role-bar">
+        <span class="role-pill" id="rolePill"></span>
+        <button class="logout-link" id="logoutBtn" type="button">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="panel">
+    <h2>Work report</h2>
+    <div class="report-tabs">
+      <button class="report-tab active" id="tabDay" data-range="day" type="button">Today's work</button>
+      <button class="report-tab" id="tabWeek" data-range="week" type="button">This week's work</button>
+    </div>
+    <div id="reportBody"></div>
+  </div>
+
+  <div class="panel submit-panel">
+    <h2>Submit a request</h2>
+    <form id="reqForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-category">Request type</label>
+          <select id="f-category">
+            <option value="photo">Photography shoot</option>
+            <option value="design">Poster / design</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-title">Event / title</label>
+          <input id="f-title" placeholder="e.g. Tech Fest opening ceremony" required>
+        </div>
+        <div class="field">
+          <label for="f-client">Requested by</label>
+          <input id="f-client" placeholder="e.g. ZABTech Media Team">
+        </div>
+        <div class="field">
+          <label for="f-due">Date</label>
+          <input id="f-due" type="date">
+        </div>
+        <div class="field wide">
+          <label for="f-note">Details — shot list, brief, dimensions, platform</label>
+          <textarea id="f-note" placeholder="e.g. A3 poster + Instagram square for the same event"></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:14px;">Submit request</button>
+    </form>
+  </div>
+
+  <div class="pipeline" id="photoPipeline"></div>
+  <div class="pipeline" id="designPipeline"></div>
+
+  <footer>
+    <span>Media Request System · records stored only in this browser</span>
+    <span id="clock"></span>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'zabtech-media-requests-v1';
+  const THEME_KEY = 'frame-desk-theme';
+  const ROLE_KEY = 'zabtech-media-role';
+  const ADMIN_PASSWORD = 'SHABBY123';
+
+  let currentRole = null;
+
+  function enterApp(role) {
+    currentRole = role;
+    safeSet(ROLE_KEY, role);
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.body.setAttribute('data-role', role);
+    document.getElementById('rolePill').textContent = role === 'admin' ? 'Admin — full access' : 'Guest — view only';
+    render();
+  }
+
+  document.getElementById('guestBtn').addEventListener('click', () => enterApp('guest'));
+  document.getElementById('adminBtn').addEventListener('click', () => {
+    const val = document.getElementById('adminPass').value;
+    if (val === ADMIN_PASSWORD) {
+      document.getElementById('loginError').style.display = 'none';
+      enterApp('admin');
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  });
+  document.getElementById('adminPass').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') document.getElementById('adminBtn').click();
+  });
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    currentRole = null;
+    safeSet(ROLE_KEY, '');
+    document.getElementById('adminPass').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    document.body.removeAttribute('data-role');
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'flex';
+  });
+
+  const PHOTO_STAGES = ['Submitted', 'Pending Edit', 'Pending Post', 'Posted'];
+  const DESIGN_STAGES = ['New Request', 'Designed', 'Pending Post', 'Posted'];
+  const STAGE_ACCENT = {
+    'Submitted': 'var(--blue)', 'New Request': 'var(--blue)',
+    'Pending Edit': 'var(--amber)', 'Designed': 'var(--amber)',
+    'Pending Post': 'var(--red)',
+    'Posted': 'var(--green)'
+  };
+
+  const root = document.documentElement;
+  const savedTheme = safeGet(THEME_KEY);
+  if (savedTheme === 'light' || savedTheme === 'dark') root.setAttribute('data-theme', savedTheme);
+  updateToggleLabel();
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    safeSet(THEME_KEY, next);
+    updateToggleLabel();
+  });
+  function updateToggleLabel() {
+    const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.getElementById('themeToggle').textContent = current === 'dark' ? 'Switch to light' : 'Switch to dark';
+  }
+  function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+  let requests = [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    requests = raw ? JSON.parse(raw) : seedData();
+  } catch (e) { requests = seedData(); }
+  if (!Array.isArray(requests) || requests.length === 0) requests = seedData();
+  persist();
+
+  let photoSeq = requests.filter(r => r.category === 'photo').length;
+  let designSeq = requests.filter(r => r.category === 'design').length;
+
+  const ACTIVITY_KEY = 'zabtech-media-activity-v1';
+  let activity = [];
+  try {
+    const rawA = localStorage.getItem(ACTIVITY_KEY);
+    activity = rawA ? JSON.parse(rawA) : [];
+  } catch (e) { activity = []; }
+  function persistActivity() { safeSet(ACTIVITY_KEY, JSON.stringify(activity)); }
+  function logActivity(type, r, extra) {
+    activity.push(Object.assign({
+      type, ref: r.ref, title: r.title, category: r.category, ts: Date.now()
+    }, extra || {}));
+    persistActivity();
+  }
+
+  function seedData() {
+    const today = new Date();
+    const inDays = n => { const d = new Date(today); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+    return [
+      { id: cid(), ref: 'PH-0001', category: 'photo', title: 'Orientation Day 2026 — event coverage', client: 'ZABTech Student Council', due: inDays(3), note: 'Cover arrival, keynote, and candid crowd shots.', stage: 'Submitted', createdAt: Date.now() },
+      { id: cid(), ref: 'PD-0001', category: 'design', title: 'Tech Fest poster set', client: 'ITVE Larkana', due: inDays(6), note: 'A3 print poster + Instagram square, same visual system.', stage: 'Designed', createdAt: Date.now() - 1 }
+    ];
+  }
+  function cid() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function persist() { safeSet(STORAGE_KEY, JSON.stringify(requests)); }
+
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    const due = new Date(dateStr + 'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    return Math.round((due - now) / 86400000);
+  }
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderSummary() {
+    const active = requests.filter(r => r.stage !== 'Posted');
+    const photoActive = requests.filter(r => r.category === 'photo' && r.stage !== 'Posted').length;
+    const designActive = requests.filter(r => r.category === 'design' && r.stage !== 'Posted').length;
+    const dueSoon = active.filter(r => { const d = daysUntil(r.due); return d !== null && d <= 3; }).length;
+    const posted = requests.filter(r => r.stage === 'Posted').length;
+    const cells = [
+      { num: active.length, label: 'Active requests' },
+      { num: photoActive, label: 'Photography in progress' },
+      { num: designActive, label: 'Design in progress' },
+      { num: posted, label: 'Completed & posted' }
+    ];
+    document.getElementById('summary').innerHTML = cells.map(c => `
+      <div class="sum-cell"><div class="num">${c.num}</div><div class="label">${c.label}</div></div>
+    `).join('');
+  }
+
+  function renderPipeline(containerId, category, stages, heading) {
+    const items = requests.filter(r => r.category === category);
+    const container = document.getElementById(containerId);
+    container.innerHTML = `
+      <div class="pipeline-head">
+        <h2>${heading}</h2>
+        <span class="count">${items.length} total</span>
+      </div>
+      <div class="columns">
+        ${stages.map(stage => {
+          const colItems = items.filter(r => r.stage === stage)
+            .sort((a, b) => (a.due || '9999') > (b.due || '9999') ? 1 : -1);
+          return `
+            <div class="column">
+              <div class="column-head" style="--col-accent:${STAGE_ACCENT[stage] || 'var(--blue)'}">
+                <span>${stage}</span>
+                <span class="n">${colItems.length}</span>
+              </div>
+              ${colItems.length === 0 ? '<div class="col-empty">No requests</div>' : colItems.map(r => cardHtml(r, stages)).join('')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    container.querySelectorAll('[data-forward]').forEach(btn => {
+      btn.addEventListener('click', () => moveStage(btn.getAttribute('data-forward'), stages, 1));
+    });
+    container.querySelectorAll('[data-back]').forEach(btn => {
+      btn.addEventListener('click', () => moveStage(btn.getAttribute('data-back'), stages, -1));
+    });
+    container.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-remove');
+        requests = requests.filter(r => r.id !== id);
+        persist(); render();
+      });
+    });
+  }
+
+  function cardHtml(r, stages) {
+    const idx = stages.indexOf(r.stage);
+    const d = daysUntil(r.due);
+    const dueSoon = d !== null && d <= 3 && r.stage !== 'Posted';
+    return `
+      <div class="card">
+        <div class="ref">${r.ref}</div>
+        <p class="title">${escapeHtml(r.title)}</p>
+        ${r.client ? `<div class="meta">${escapeHtml(r.client)}</div>` : ''}
+        ${r.due ? `<div class="meta">Due ${formatDate(r.due)}</div>` : ''}
+        ${r.note ? `<p class="note">${escapeHtml(r.note)}</p>` : ''}
+        ${dueSoon ? `<span class="due-flag">${d < 0 ? 'Overdue' : d === 0 ? 'Due today' : 'Due in ' + d + 'd'}</span>` : ''}
+        ${currentRole === 'admin' ? `
+        <div class="card-actions">
+          ${idx > 0 ? `<button data-back="${r.id}">◂ Back</button>` : ''}
+          ${idx < stages.length - 1 ? `<button data-forward="${r.id}">Next ▸</button>` : ''}
+          <button class="danger" data-remove="${r.id}">Remove</button>
+        </div>` : ''}
+      </div>
+    `;
+  }
+
+  function moveStage(id, stages, dir) {
+    const r = requests.find(x => x.id === id);
+    if (!r) return;
+    const idx = stages.indexOf(r.stage);
+    const next = idx + dir;
+    if (next >= 0 && next < stages.length) {
+      const fromStage = r.stage;
+      r.stage = stages[next];
+      logActivity('moved', r, { from: fromStage, to: r.stage });
+    }
+    persist(); render();
+  }
+
+  function render() {
+    renderSummary();
+    renderPipeline('photoPipeline', 'photo', PHOTO_STAGES, 'Photography pipeline');
+    renderPipeline('designPipeline', 'design', DESIGN_STAGES, 'Poster & design pipeline');
+    renderReport();
+  }
+
+  let currentReportRange = 'day';
+
+  function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function startOfWeek(d) {
+    const x = startOfDay(d);
+    const day = x.getDay();
+    const diff = day === 0 ? 6 : day - 1; // week starts Monday
+    x.setDate(x.getDate() - diff);
+    return x;
+  }
+
+  function reportLineHtml(a) {
+    const time = new Date(a.ts).toLocaleString(undefined, Object.assign(
+      { hour: '2-digit', minute: '2-digit' },
+      currentReportRange === 'week' ? { weekday: 'short' } : {}
+    ));
+    let text = '';
+    if (a.type === 'created') {
+      text = `New request <strong>${a.ref}</strong> submitted — ${escapeHtml(a.title)}`;
+    } else if (a.type === 'moved') {
+      text = `<strong>${a.ref}</strong> ${escapeHtml(a.to)} — ${escapeHtml(a.title)}`;
+    }
+    return `<div class="report-line"><span class="report-time">${time}</span><span class="report-text">${text}</span></div>`;
+  }
+
+  function reportGroupHtml(heading, items, label) {
+    return `
+      <div class="report-group">
+        <div class="report-group-head"><span>${heading}</span><span class="n">${items.length}</span></div>
+        ${items.length === 0
+          ? `<div class="col-empty">No ${heading.toLowerCase()} work ${label} yet.</div>`
+          : `<div class="report-list">${items.map(reportLineHtml).join('')}</div>`}
+      </div>
+    `;
+  }
+
+  function renderReport() {
+    const body = document.getElementById('reportBody');
+    if (!body) return;
+    const now = new Date();
+    const rangeStart = currentReportRange === 'day' ? startOfDay(now) : startOfWeek(now);
+    const items = activity.filter(a => a.ts >= rangeStart.getTime()).sort((a, b) => b.ts - a.ts);
+    const photoItems = items.filter(a => a.category === 'photo');
+    const designItems = items.filter(a => a.category === 'design');
+    const posted = items.filter(a => a.type === 'moved' && a.to === 'Posted').length;
+    const label = currentReportRange === 'day' ? 'today' : 'this week';
+
+    body.innerHTML = `
+      <div class="report-summary">
+        <span><strong>${photoItems.length}</strong>photography</span>
+        <span><strong>${designItems.length}</strong>poster / design</span>
+        <span><strong>${posted}</strong>posted / completed</span>
+      </div>
+      <div class="report-groups">
+        ${reportGroupHtml('Photography', photoItems, label)}
+        ${reportGroupHtml('Poster / Design', designItems, label)}
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('.report-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentReportRange = btn.getAttribute('data-range');
+      renderReport();
+    });
+  });
+
+  document.getElementById('reqForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    if (currentRole !== 'admin') return;
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) return;
+    const category = document.getElementById('f-category').value;
+    let ref;
+    if (category === 'photo') { photoSeq += 1; ref = 'PH-' + String(photoSeq).padStart(4, '0'); }
+    else { designSeq += 1; ref = 'PD-' + String(designSeq).padStart(4, '0'); }
+    const newReq = {
+      id: cid(),
+      ref,
+      category,
+      title,
+      client: document.getElementById('f-client').value.trim(),
+      due: document.getElementById('f-due').value,
+      note: document.getElementById('f-note').value.trim(),
+      stage: category === 'photo' ? 'Submitted' : 'New Request',
+      createdAt: Date.now()
+    };
+    requests.push(newReq);
+    logActivity('created', newReq);
+    persist();
+    ev.target.reset();
+    document.getElementById('f-category').value = 'photo';
+    render();
+  });
+
+  function tick() {
+    const now = new Date();
+    document.getElementById('docDate').textContent = 'As of ' + now.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('clock').textContent = now.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+  tick();
+  setInterval(tick, 30000);
+
+  const savedRole = safeGet(ROLE_KEY);
+  if (savedRole === 'admin' || savedRole === 'guest') {
+    enterApp(savedRole);
+  }
+})();
+</script>
+</body>
+</html>
